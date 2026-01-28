@@ -1,4 +1,4 @@
-# tcmux
+# tcmux [![build](https://github.com/k1LoW/tcmux/actions/workflows/ci.yml/badge.svg)](https://github.com/k1LoW/tcmux/actions/workflows/ci.yml) ![Coverage](https://raw.githubusercontent.com/k1LoW/octocovs/main/badges/k1LoW/tcmux/coverage.svg) ![Code to Test Ratio](https://raw.githubusercontent.com/k1LoW/octocovs/main/badges/k1LoW/tcmux/ratio.svg) ![Test Execution Time](https://raw.githubusercontent.com/k1LoW/octocovs/main/badges/k1LoW/tcmux/time.svg)
 
 `tcmux` is a **t**erminal and **C**laude Code **mux** viewer.
 
