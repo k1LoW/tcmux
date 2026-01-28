@@ -1,0 +1,9 @@
+# config file for the tagpr in git config format
+[tagpr]
+	vPrefix = true
+	releaseBranch = main
+	release = draft
+	versionFile = version/version.go
+	command = "make prerelease_for_tagpr"
+	majorLabels = "tagpr:major"
+	minorLabels = "tagpr:minor"

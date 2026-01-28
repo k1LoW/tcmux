@@ -1,0 +1,32 @@
+name: trivy
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  job-trivy:
+    name: Run trivy for license check
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Check out source code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Run trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scanners: 'license'
+          target: '.'
+          format: 'table'
+          exit-code: '1'
+          severity: 'UNKNOWN,MEDIUM,HIGH'

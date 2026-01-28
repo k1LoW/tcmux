@@ -1,0 +1,44 @@
+name: build
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  job-test:
+    name: Test
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: write
+    steps:
+      - name: Check out source code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Run lint
+        uses: reviewdog/action-golangci-lint@v2
+        with:
+          fail_level: error
+          go_version_file: go.mod
+          cache: false
+
+      - name: Run gostyle
+        uses: k1LoW/gostyle-action@v1
+        with:
+          config-file: .gostyle.yml
+
+      - name: Run tests
+        run: make ci
+
+      - name: Run octocov
+        uses: k1LoW/octocov-action@v1
