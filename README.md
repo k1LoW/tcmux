@@ -69,29 +69,17 @@ Replace `tmux list-windows` with `tcmux list-windows -A` in your `.tmux.conf`:
 
 ```tmux
 # before
-bind-key w run-shell "\
-  tmux list-windows \
-  | fzf --tmux \
-  | cut -d: -f1 \
-  | xargs tmux select-window -t"
+bind-key w run-shell "tmux list-windows | fzf --tmux | cut -d: -f1 | xargs tmux select-window -t"
 ```
 
 ```tmux
 # after
-bind-key w run-shell "\
-  tcmux list-windows -A --color=always \
-  | fzf --ansi --tmux \
-  | cut -d: -f1 \
-  | xargs tmux select-window -t"
+bind-key w run-shell "tcmux list-windows -A --color=always | fzf --ansi --tmux | cut -d: -f1 | xargs tmux select-window -t"
 ```
 
 ```tmux
 # screenshot example
-bind -r w run-shell "\
-  tcmux lsw -A --color=always \
-  | fzf --ansi --layout reverse --tmux 80%,50% --color='pointer:24' \
-  | cut -d: -f 1 \
-  | xargs tmux select-window -t"
+bind -r w run-shell "tcmux lsw -A --color=always | fzf --ansi --layout reverse --tmux 80%,50% --color='pointer:24' | cut -d: -f 1 | xargs tmux select-window -t"
 ```
 
 ## Install
