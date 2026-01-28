@@ -18,8 +18,8 @@ var lsFormat string
 var lsCmd = &cobra.Command{
 	Use:     "list-sessions",
 	Aliases: []string{"ls"},
-	Short:   "List tmux sessions with Claude Code info",
-	Long:    `List tmux sessions with Claude Code instance statistics.`,
+	Short:   "List tmux sessions with Claude Code status",
+	Long:    `List tmux sessions with Claude Code status.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// Use format string if specified, otherwise use default
 		format := lsFormat
