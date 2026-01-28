@@ -5,7 +5,7 @@
 ## Usage
 
 ```console
-$ tcmux list-windows  # alias: lsw
+$ tcmux list-windows  # List Claude Code instances in tmux windows (alias: lsw)
 0: editor (1 panes) ✻ Fix login bug [Idle]
 2: server (2 panes) ✻ Add API endpoint [Running (1m 30s)], ✻ Write tests [Idle]
 5: docs (1 panes) ✻ Update README [Idle]
@@ -20,7 +20,7 @@ $ tcmux list-windows -A  # Show all windows, not just Claude Code
 5: docs (1 panes) ✻ Update README [Idle]
 7: review (1 panes) ✻ Review PR [Waiting]
 
-$ tcmux list-sessions  # alias: ls
+$ tcmux list-sessions  # List tmux sessions with Claude Code status (alias: ls)
 dev: 7 windows (attached) - 3 Idle, 1 Running, 1 Waiting
 main: 2 windows - 1 Idle
 work: 1 window
@@ -32,7 +32,7 @@ work: 1 window
 
 | Option | Description |
 |--------|-------------|
-| `-A, --all-windows` | Show all windows, not just Claude Code |
+| `-A, --all-windows` | Show all windows, not just Claude Code. Use this when replacing `tmux list-windows` with tcmux |
 | `-a, --all-sessions` | List windows from all sessions |
 | `-t, --target-session` | Specify target session |
 | `-F, --format` | Specify output format (tmux-compatible with tcmux extensions) |
