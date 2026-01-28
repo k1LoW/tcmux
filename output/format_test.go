@@ -24,12 +24,12 @@ func TestExtractTmuxVars(t *testing.T) {
 		},
 		{
 			name:   "Exclude tcmux variables",
-			format: "#{window_index} #{c_status}",
+			format: "#{window_index} #{agent_status}",
 			want:   []string{"window_index"},
 		},
 		{
 			name:   "Only tcmux variables",
-			format: "#{c_status} #{c_status}",
+			format: "#{agent_status} #{agent_status}",
 			want:   nil,
 		},
 		{
@@ -79,8 +79,8 @@ func TestExpandFormat(t *testing.T) {
 			want: "0: editor",
 		},
 		{
-			name:   "Expand c_status with status only",
-			format: "#{c_status}",
+			name:   "Expand agent_status with status only",
+			format: "#{agent_status}",
 			ctx: &FormatContext{
 				TmuxVars: map[string]string{},
 				ClaudeInstances: []ClaudeInfo{
@@ -90,8 +90,8 @@ func TestExpandFormat(t *testing.T) {
 			want: "✻ [Idle]",
 		},
 		{
-			name:   "Expand c_status with summary and status",
-			format: "#{c_status}",
+			name:   "Expand agent_status with summary and status",
+			format: "#{agent_status}",
 			ctx: &FormatContext{
 				TmuxVars: map[string]string{},
 				ClaudeInstances: []ClaudeInfo{
@@ -101,8 +101,8 @@ func TestExpandFormat(t *testing.T) {
 			want: "✻ Fix login bug [Idle]",
 		},
 		{
-			name:   "Expand c_status with full status",
-			format: "#{c_status}",
+			name:   "Expand agent_status with full status",
+			format: "#{agent_status}",
 			ctx: &FormatContext{
 				TmuxVars: map[string]string{},
 				ClaudeInstances: []ClaudeInfo{
@@ -119,8 +119,8 @@ func TestExpandFormat(t *testing.T) {
 			want: "✻ Fix login bug [Running (1m 30s, plan mode)]",
 		},
 		{
-			name:   "Empty c_status when no instances",
-			format: "test #{c_status}",
+			name:   "Empty agent_status when no instances",
+			format: "test #{agent_status}",
 			ctx: &FormatContext{
 				TmuxVars:        map[string]string{},
 				ClaudeInstances: []ClaudeInfo{},
@@ -129,7 +129,7 @@ func TestExpandFormat(t *testing.T) {
 		},
 		{
 			name:   "Combined format",
-			format: "#{window_index}: #{window_name} #{c_status}",
+			format: "#{window_index}: #{window_name} #{agent_status}",
 			ctx: &FormatContext{
 				TmuxVars: map[string]string{
 					"window_index": "0",
@@ -143,7 +143,7 @@ func TestExpandFormat(t *testing.T) {
 		},
 		{
 			name:   "Multiple Claude Code instances",
-			format: "#{c_status}",
+			format: "#{agent_status}",
 			ctx: &FormatContext{
 				TmuxVars: map[string]string{},
 				ClaudeInstances: []ClaudeInfo{
@@ -172,8 +172,8 @@ func TestExpandSessionFormat(t *testing.T) {
 		want   string
 	}{
 		{
-			name:   "Expand c_status with all states",
-			format: "#{c_status}",
+			name:   "Expand agent_status with all states",
+			format: "#{agent_status}",
 			ctx: &SessionFormatContext{
 				TmuxVars:     map[string]string{},
 				IdleCount:    2,
@@ -183,8 +183,8 @@ func TestExpandSessionFormat(t *testing.T) {
 			want: "2 Idle, 1 Running, 1 Waiting",
 		},
 		{
-			name:   "Expand c_status with only idle",
-			format: "#{c_status}",
+			name:   "Expand agent_status with only idle",
+			format: "#{agent_status}",
 			ctx: &SessionFormatContext{
 				TmuxVars:  map[string]string{},
 				IdleCount: 3,
@@ -192,8 +192,8 @@ func TestExpandSessionFormat(t *testing.T) {
 			want: "3 Idle",
 		},
 		{
-			name:   "Empty c_status when no Claude Code",
-			format: "#{c_status}",
+			name:   "Empty agent_status when no Claude Code",
+			format: "#{agent_status}",
 			ctx: &SessionFormatContext{
 				TmuxVars: map[string]string{},
 			},
@@ -201,7 +201,7 @@ func TestExpandSessionFormat(t *testing.T) {
 		},
 		{
 			name:   "Combined session format",
-			format: "#{session_name}: #{session_windows} windows #{c_status}",
+			format: "#{session_name}: #{session_windows} windows #{agent_status}",
 			ctx: &SessionFormatContext{
 				TmuxVars: map[string]string{
 					"session_name":    "dev",

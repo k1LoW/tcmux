@@ -11,7 +11,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const defaultSessionFormat = "#{session_name}: #{session_windows} windows#{?session_attached, (attached),} #{c_status}"
+const defaultSessionFormat = "#{session_name}: #{session_windows} windows#{?session_attached, (attached),} #{agent_status}"
 
 var lsFormat string
 
