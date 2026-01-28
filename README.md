@@ -49,7 +49,7 @@ tcmux supports all tmux format variables (e.g., `#{window_index}`, `#{window_nam
 
 | Variable | Description |
 |----------|-------------|
-| `#{c_status}` | Claude Code status (context-dependent) |
+| `#{agent_status}` | Claude Code status (context-dependent) |
 
 - **list-windows:** `✻ Fix login bug [Idle], ✻ Add feature [Running (1m 30s, plan mode)]`
 - **list-sessions:** `2 Idle, 1 Running`
@@ -57,8 +57,8 @@ tcmux supports all tmux format variables (e.g., `#{window_index}`, `#{window_nam
 **Example:**
 
 ```console
-$ tcmux list-windows -F "#{window_index}:#{window_name} #{c_status}"
-$ tcmux list-sessions -F "#{session_name}: #{c_status}"
+$ tcmux list-windows -F "#{window_index}:#{window_name} #{agent_status}"
+$ tcmux list-sessions -F "#{session_name}: #{agent_status}"
 ```
 
 ### Recipe: Window switcher with Claude Code status

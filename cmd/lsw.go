@@ -10,7 +10,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const defaultWindowFormat = "#{window_index}: #{window_name} (#{window_panes} panes) #{c_status}"
+const defaultWindowFormat = "#{window_index}: #{window_name} (#{window_panes} panes) #{agent_status}"
 
 var (
 	allWindows  bool
@@ -109,7 +109,7 @@ var lswCmd = &cobra.Command{
 			}
 
 			line := output.ExpandFormat(format, ctx)
-			// Trim trailing whitespace (in case c_status is empty)
+			// Trim trailing whitespace (in case agent_status is empty)
 			line = strings.TrimRight(line, " ")
 			results = append(results, line)
 		}

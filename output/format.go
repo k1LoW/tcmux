@@ -11,7 +11,7 @@ import (
 
 // tcmux custom format variables
 const (
-	VarCStatus = "c_status" // Claude Code status (context-dependent output)
+	VarAgentStatus = "agent_status" // Coding agent status (context-dependent output)
 )
 
 var (
@@ -20,7 +20,7 @@ var (
 
 	// tcmux custom variables
 	tcmuxVars = map[string]bool{
-		VarCStatus: true,
+		VarAgentStatus: true,
 	}
 )
 
@@ -84,8 +84,8 @@ func ExpandFormat(format string, ctx *FormatContext) string {
 		varName := match[2 : len(match)-1]
 
 		switch varName {
-		case VarCStatus:
-			return formatCStatus(ctx.ClaudeInstances)
+		case VarAgentStatus:
+			return formatAgentStatus(ctx.ClaudeInstances)
 		default:
 			// tmux variable - use value from TmuxVars
 			if val, ok := ctx.TmuxVars[varName]; ok {
@@ -106,8 +106,8 @@ func ExpandSessionFormat(format string, ctx *SessionFormatContext) string {
 		varName := match[2 : len(match)-1]
 
 		switch varName {
-		case VarCStatus:
-			return formatCStats(ctx.IdleCount, ctx.RunningCount, ctx.WaitingCount)
+		case VarAgentStatus:
+			return formatAgentStats(ctx.IdleCount, ctx.RunningCount, ctx.WaitingCount)
 		default:
 			// tmux variable
 			if val, ok := ctx.TmuxVars[varName]; ok {
@@ -120,10 +120,10 @@ func ExpandSessionFormat(format string, ctx *SessionFormatContext) string {
 	return result
 }
 
-// formatCStatus formats the full Claude Code status string for multiple instances.
+// formatAgentStatus formats the full coding agent status string for multiple instances.
 // Format: "✻ summary [Status (description, mode)], ✻ summary2 [Status2]"
-// Returns empty string if no Claude Code instances.
-func formatCStatus(instances []ClaudeInfo) string {
+// Returns empty string if no coding agent instances.
+func formatAgentStatus(instances []ClaudeInfo) string {
 	if len(instances) == 0 {
 		return ""
 	}
@@ -184,8 +184,8 @@ func formatCStatus(instances []ClaudeInfo) string {
 	return strings.Join(instanceParts, ", ")
 }
 
-// formatCStats formats Claude Code statistics for a session.
-func formatCStats(idle, running, waiting int) string {
+// formatAgentStats formats coding agent statistics for a session.
+func formatAgentStats(idle, running, waiting int) string {
 	total := idle + running + waiting
 	if total == 0 {
 		return ""
