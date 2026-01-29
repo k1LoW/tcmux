@@ -84,6 +84,18 @@ bind -r w run-shell "tcmux lsw -A --color=always | fzf --ansi --layout reverse -
 
 ## Install
 
+**homebrew tap:**
+
+```console
+$ brew install k1LoW/tap/tcmux
+```
+
+**go install:**
+
 ```console
 $ go install github.com/k1LoW/tcmux@latest
 ```
+
+**manually:**
+
+Download binary from [releases page](https://github.com/k1LoW/tcmux/releases)
