@@ -193,6 +193,50 @@ Enter to select · ↑/↓ to navigate · Esc to cancel`,
 			wantDesc:  "",
 		},
 		{
+			name: "Idle with file changes status line",
+			content: `⏺ Some output about "Do you want to proceed?"
+
+✻ Churned for 3m 5s
+
+! make install
+  ⎿  go install completed
+
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+❯
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  4 files +42 -0`,
+			wantState: StateIdle,
+			wantMode:  "",
+			wantDesc:  "",
+		},
+		{
+			name: "Waiting - Bash command confirmation dialog",
+			content: `⏺ Bash(gh issue view 395 --repo peco/peco 2>/dev/null || echo "Issue #395 not found or closed")
+  ⎿  title:     Close old issues (before 2016)
+     state:     CLOSED
+     author:    lestrrat
+     … +22 lines (ctrl+o to expand)
+
+⏺ Bash(fzf --help 2>/dev/null | grep -A5 -- "--ansi" || echo "fzf not installed or --ansi help not found")
+  ⎿  Running…
+
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ Bash command
+
+   fzf --help 2>/dev/null | grep -A5 -- "--ansi" || echo "fzf not installed or --ansi help not found"
+   Check fzf --ansi option help
+
+ Do you want to proceed?
+ ❯ 1. Yes
+   2. Yes, and don't ask again for fzf --help commands in /Users/k1low/src/github.com/peco/peco
+   3. No
+
+ Esc to cancel · Tab to amend · ctrl+e to explain`,
+			wantState: StateWaiting,
+			wantMode:  "",
+			wantDesc:  "",
+		},
+		{
 			name: "Unknown state",
 			content: `Some random output
 without any recognizable pattern`,

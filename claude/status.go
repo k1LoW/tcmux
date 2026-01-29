@@ -47,11 +47,19 @@ var (
 		"Allow this MCP server",
 		"Continue?",
 		"Proceed?",
+		"Do you want to proceed?",
 		"(Y/n)",
 		"(y/N)",
 		"[Y/n]",
 		"[y/N]",
 	}
+
+	// Selection menu pattern: numbered options with ❯ marker
+	// e.g., "❯ 1. Yes", "❯ 2. No"
+	selectionMenuPattern = regexp.MustCompile(`❯\s+\d+\.`)
+
+	// File changes status line pattern: "4 files +42 -0", "1 file +10 -5"
+	fileChangesPattern = regexp.MustCompile(`^\s*\d+\s+files?\s+[+-]`)
 
 	// Plan mode pattern
 	planModePattern = regexp.MustCompile(`⏸\s+plan\s+mode\s+on`)
@@ -129,6 +137,11 @@ func ParseStatus(content string) Status {
 		status.State = StateWaiting
 		return status
 	}
+	// Selection menu with numbered options (❯ 1. Yes, ❯ 2. No, etc.)
+	if selectionMenuPattern.MatchString(combined) {
+		status.State = StateWaiting
+		return status
+	}
 
 	// Fallback: check for idle state using pattern match
 	if idlePattern.MatchString(combined) {
@@ -172,12 +185,18 @@ func isPromptLine(lines []string) bool {
 		// Skip common footer lines
 		if strings.Contains(line, "? for shortcuts") ||
 			strings.Contains(line, "ctrl+") ||
-			strings.Contains(line, "shift+") {
+			strings.Contains(line, "shift+") ||
+			fileChangesPattern.MatchString(line) {
 			continue
 		}
 		// Check if this line is a prompt
 		// Claude Code prompt: "❯" or "❯ " (possibly with suggestion)
+		// But NOT selection menu markers like "❯ 1. Yes"
 		if strings.HasPrefix(line, "❯") {
+			// Check if it's a selection menu marker (❯ followed by number and dot)
+			if selectionMenuPattern.MatchString(line) {
+				return false
+			}
 			return true
 		}
 		// Not a prompt line
