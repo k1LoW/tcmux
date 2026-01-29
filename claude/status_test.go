@@ -87,6 +87,20 @@ func TestParseStatus(t *testing.T) {
 			wantDesc:  "",
 		},
 		{
+			name: "Not Running when indented status line (quoted text)",
+			content: `⏺ 現在の内容は：
+  ✻ Galloping… (esc to interrupt · 1m 19s · ↓ 5.9k tokens · thinking)
+
+✻ Cooked for 1m 29s
+
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+❯
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────`,
+			wantState: StateIdle,
+			wantMode:  "",
+			wantDesc:  "",
+		},
+		{
 			name: "Waiting with permission prompt (Yes allow once)",
 			content: `Some output
 Yes, allow once
@@ -109,6 +123,23 @@ Continue? (Y/n)`,
 ✻ Cooked for 43s
 ───────────────────────────────────────
 ❯ `,
+			wantState: StateIdle,
+			wantMode:  "",
+			wantDesc:  "",
+		},
+		{
+			name: "Idle after task completion with file changes",
+			content: `⏺ Window 10 is now Idle (accept edits), Window 11 shows Running (4m 48s) correctly.
+
+✻ Sautéed for 2m 55s
+
+! make install
+  ⎿  go install completed
+
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+❯
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  4 files +73 -3`,
 			wantState: StateIdle,
 			wantMode:  "",
 			wantDesc:  "",
@@ -165,7 +196,7 @@ Enter to select · ↑/↓ to navigate · Esc to cancel`,
 		},
 		{
 			name: "Idle with trust dialog overlay",
-			content: ` /Users/k1low/src/github.com/k1LoW/tcmux
+			content: ` /home/user/projects/myapp
 
  Claude Code may read, write, or execute files contained in this directory.
 
@@ -181,7 +212,7 @@ Enter to select · ↑/↓ to navigate · Esc to cancel`,
  Enter to confirm · Esc to cancel
 
 ╭─── Claude Code v2.1.15 ───╮
-│  Welcome back k1low!      │
+│  Welcome back user!       │
 ╰───────────────────────────╯
 
 ───────────────────────────────────────
@@ -211,30 +242,98 @@ Enter to select · ↑/↓ to navigate · Esc to cancel`,
 		},
 		{
 			name: "Waiting - Bash command confirmation dialog",
-			content: `⏺ Bash(gh issue view 395 --repo peco/peco 2>/dev/null || echo "Issue #395 not found or closed")
-  ⎿  title:     Close old issues (before 2016)
+			content: `⏺ Bash(gh issue view 123 --repo owner/repo 2>/dev/null || echo "Issue #123 not found or closed")
+  ⎿  title:     Fix bug in parser
      state:     CLOSED
-     author:    lestrrat
+     author:    contributor
      … +22 lines (ctrl+o to expand)
 
-⏺ Bash(fzf --help 2>/dev/null | grep -A5 -- "--ansi" || echo "fzf not installed or --ansi help not found")
+⏺ Bash(grep --help 2>/dev/null | head -10)
   ⎿  Running…
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
  Bash command
 
-   fzf --help 2>/dev/null | grep -A5 -- "--ansi" || echo "fzf not installed or --ansi help not found"
-   Check fzf --ansi option help
+   grep --help 2>/dev/null | head -10
+   Check grep help
 
  Do you want to proceed?
  ❯ 1. Yes
-   2. Yes, and don't ask again for fzf --help commands in /Users/k1low/src/github.com/peco/peco
+   2. Yes, and don't ask again for grep commands in /home/user/projects/myapp
    3. No
 
  Esc to cancel · Tab to amend · ctrl+e to explain`,
 			wantState: StateWaiting,
 			wantMode:  "",
 			wantDesc:  "",
+		},
+		{
+			name: "Running with action text containing spaces",
+			content: `      219 + export function createUserHandler(): UserHandler<UserArgs> {
+      220 +   return {
+      221 +     kind: "createUser",
+      222 +     __args: {} as UserArgs,
+      223 +   };
+      224 + }
+
+✶ Adding handler types and functions to handlers.ts… (ctrl+c to interrupt · ctrl+t to hide todos · 3m 27s · ↑ 11.0k tokens)
+  ⎿  ☐ Add handler types and functions to handlers.ts
+     ☐ Update Handler type in index.ts
+     ☐ Add Zod schemas to schema.ts
+     ☐ Export types from types.ts
+     ☐ Add conversion logic to cli.ts
+     ☐ Run typecheck, test, and build
+
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+❯
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  ⏵⏵ accept edits on (shift+tab to cycle)`,
+			wantState: StateRunning,
+			wantMode:  ModeAcceptEdits,
+			wantDesc:  "3m 27s",
+		},
+		{
+			name: "Running with Spinning and plan mode (ctrl+c to interrupt without time)",
+			content: `⏺ Understanding the feature request. First, let me check the documentation and current implementation.
+
+  Explore(Explore handler implementation)
+  ⎿  Found 5 files
+     Found 18 files
+     Read(packages/sdk/src/cli/apply/services/handler.ts)
+     +27 more tool uses (ctrl+o to expand)
+
+⏺ Fetch(https://example.com/docs/guides/handlers)
+  ⎿  Received 51.6KB (200 OK)
+     ctrl+b ctrl+b (twice) to run in background
+
+✻ Spinning… (ctrl+c to interrupt)
+  ⎿  Tip: Type 'ultrathink' in your message to enable thinking for just that turn
+
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+❯
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  ⏸ plan mode on (shift+tab to cycle)`,
+			wantState: StateRunning,
+			wantMode:  ModePlan,
+			wantDesc:  "",
+		},
+		{
+			name: "Running with Crystallizing and accept edits mode",
+			content: `✶ Crystallizing… (esc to interrupt · ctrl+t to hide tasks · 52s · ↓ 574 tokens)
+  ⎿  ✔ Add dependency to go.mod
+     ◻ Add configuration setting to config.go
+     ◻ Update library usage in parser.go
+     ◻ Pass format option to handler
+     ◻ Add and update tests
+     ◻ Run go test to verify
+
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+❯
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  ⏵⏵ accept edits on (shift+Tab to cycle)`,
+			wantState: StateRunning,
+			wantMode:  ModeAcceptEdits,
+			wantDesc:  "52s",
 		},
 		{
 			name: "Unknown state",

@@ -43,7 +43,7 @@ tcmux is a CLI tool that displays Claude Code instances running in tmux windows/
   - `tmux.go` - Wraps `tmux list-panes`, `tmux list-sessions`, `tmux capture-pane`
 
 - **output/**: Output formatting and colorization
-  - `format.go` - Expands format strings with tmux variables and custom `#{c_status}` variable
+  - `format.go` - Expands format strings with tmux variables and custom `#{agent_status}` variable
   - `color.go` - Terminal color handling with `termenv`
 
 ### Data Flow

@@ -30,8 +30,10 @@ var (
 	// Running indicators: various symbols followed by action text and time
 	// Symbols include: ✢, ✽, ✶, ✻, · (middle dot), etc.
 	// Action text can be English (Clauding, Thinking, etc.) or Japanese
+	// Action text may contain spaces (e.g., "Adding types to file.ts")
 	// Time format: "30s", "1m 45s", "2m 10s", etc.
-	runningPattern = regexp.MustCompile(`[✢✽✶✻·]\s+\S+…?\s+\([^)]*·\s*((?:\d+[smh]\s*)+)`)
+	// Pattern must start at beginning of line to avoid matching quoted text
+	runningPattern = regexp.MustCompile(`(?m)^[✢✽✶✻·]\s+.+?…?\s*\([^)]*·\s*((?:\d+[smh]\s*)+)`)
 
 	// Waiting patterns: Agent is asking for user input/selection
 	// From agent-deck: permission prompts, confirmation dialogs, etc.
@@ -77,8 +79,9 @@ var (
 
 	// Running fallback pattern (from agent-deck)
 	// Matches Claude Code status line: ✻ Verb… (esc to interrupt) or (ctrl+c to interrupt)
-	// Must start with status symbol to avoid matching text that mentions these phrases
-	runningFallbackPattern = regexp.MustCompile(`[✢✽✶✻·]\s+\S+…?\s+\((esc|ctrl\+c) to interrupt`)
+	// Must start at beginning of line to avoid matching quoted text
+	// Action text may contain spaces
+	runningFallbackPattern = regexp.MustCompile(`(?m)^[✢✽✶✻·]\s+.+?…?\s*\((esc|ctrl\+c) to interrupt`)
 )
 
 // ParseStatus parses the pane content and determines the status.
