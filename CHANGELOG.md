@@ -1,5 +1,7 @@
 # Changelog
 
+## [v0.2.2](https://github.com/k1LoW/tcmux/compare/v0.2.1...v0.2.2) - 2026-01-29
+
 ## [v0.2.1](https://github.com/k1LoW/tcmux/compare/v0.2.0...v0.2.1) - 2026-01-29
 - fix: improve status detection by @k1LoW in https://github.com/k1LoW/tcmux/pull/7
 
