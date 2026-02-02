@@ -33,7 +33,14 @@ var (
 	// Action text may contain spaces (e.g., "Adding types to file.ts")
 	// Time format: "30s", "1m 45s", "2m 10s", etc.
 	// Pattern must start at beginning of line to avoid matching quoted text
+	// Format 1: (esc to interrupt · 1m 45s · ...) - time after middle dot
 	runningPattern = regexp.MustCompile(`(?m)^[✢✽✶✻·]\s+.+?…?\s*\([^)]*·\s*((?:\d+[smh]\s*)+)`)
+
+	// Format 2: (1m 52s · ...) - time at the beginning of parentheses
+	runningPatternTimeFirst = regexp.MustCompile(`(?m)^[✢✽✶✻·]\s+.+?…?\s*\(((?:\d+[smh]\s*)+)\s*·`)
+
+	// "esc to interrupt" at the end of status line indicates Running
+	escToInterruptEndPattern = regexp.MustCompile(`(?m)·\s*esc to interrupt\s*$`)
 
 	// Waiting patterns: Agent is asking for user input/selection
 	// From agent-deck: permission prompts, confirmation dialogs, etc.
@@ -108,7 +115,15 @@ func ParseStatus(content string) Status {
 	}
 
 	// Check for running state (primary pattern with time extraction)
+	// Format 1: (esc to interrupt · 1m 45s · ...) - time after middle dot
 	if matches := runningPattern.FindStringSubmatch(combined); len(matches) > 0 {
+		status.State = StateRunning
+		status.Description = strings.TrimSpace(matches[1]) // Time elapsed
+		return status
+	}
+
+	// Format 2: (1m 52s · ...) - time at the beginning of parentheses
+	if matches := runningPatternTimeFirst.FindStringSubmatch(combined); len(matches) > 0 {
 		status.State = StateRunning
 		status.Description = strings.TrimSpace(matches[1]) // Time elapsed
 		return status
@@ -117,6 +132,12 @@ func ParseStatus(content string) Status {
 	// Check for running state (fallback pattern without time)
 	// This ensures "esc to interrupt" is detected as Running even without time info
 	if runningFallbackPattern.MatchString(combined) {
+		status.State = StateRunning
+		return status
+	}
+
+	// Check for "esc to interrupt" at end of status line (e.g., "4 files +20 -0 · esc to interrupt")
+	if escToInterruptEndPattern.MatchString(combined) {
 		status.State = StateRunning
 		return status
 	}

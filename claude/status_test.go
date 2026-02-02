@@ -55,6 +55,26 @@ func TestParseStatus(t *testing.T) {
 			wantDesc:  "2m 10s",
 		},
 		{
+			name: "Running with time first format",
+			content: `Some output
+✢ Reticulating… (1m 52s · ↓ 11.5k tokens · thought for 7s)`,
+			wantState: StateRunning,
+			wantMode:  "",
+			wantDesc:  "1m 52s",
+		},
+		{
+			name: "Running with esc to interrupt at end of status line",
+			content: `Some output
+✶ Proofing… (thinking)
+───────────────────────────────────────
+❯
+───────────────────────────────────────
+  4 files +20 -0 · esc to interrupt`,
+			wantState: StateRunning,
+			wantMode:  "",
+			wantDesc:  "",
+		},
+		{
 			name: "Running with Jitterbugging (middle dot)",
 			content: `Some output
 · Jitterbugging… (esc to interrupt · 1m 8s · ↓ 3.6k tokens · thinking)`,
