@@ -1,5 +1,5 @@
 package version
 
-const Version = "0.2.3" //nostyle:repetition
+const Version = "0.3.0" //nostyle:repetition
 
 var Revision = "HEAD"
