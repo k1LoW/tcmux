@@ -5,7 +5,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/k1LoW/tcmux/claude"
+	"github.com/k1LoW/tcmux/agent"
 	"github.com/k1LoW/tcmux/output"
 	"github.com/k1LoW/tcmux/tmux"
 	"github.com/spf13/cobra"
@@ -18,8 +18,8 @@ var lsFormat string
 var lsCmd = &cobra.Command{
 	Use:     "list-sessions",
 	Aliases: []string{"ls"},
-	Short:   "List tmux sessions with Claude Code status",
-	Long:    `List tmux sessions with Claude Code status.`,
+	Short:   "List tmux sessions with coding agent status",
+	Long:    `List tmux sessions with coding agent status (Claude Code, Copilot CLI).`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// Use format string if specified, otherwise use default
 		format := lsFormat
@@ -47,7 +47,7 @@ var lsCmd = &cobra.Command{
 			return nil
 		}
 
-		// Get all panes to count Claude Code instances per session
+		// Get all panes to count coding agent instances per session
 		paneFormat := buildTmuxFormat(tmux.InternalPaneVars)
 		panes, err := tmux.ListPanes(ctx, paneFormat, tmux.InternalPaneVars, tmux.ListPanesOptions{AllSessions: true})
 		if err != nil {
@@ -63,17 +63,15 @@ var lsCmd = &cobra.Command{
 			}
 		}
 
-		// Count Claude Code instances per session
+		// Count coding agent instances per session
 		for _, pane := range panes {
 			stats, ok := sessionStats[pane.Vars["session_name"]]
 			if !ok {
 				continue
 			}
 
-			if !claude.MayBeTitle(pane.Vars["pane_title"]) {
-				continue
-			}
-			if !claude.MayBeProcess(pane.Vars["pane_current_command"]) {
+			detectedAgent := agent.Detect(pane.Vars["pane_title"], pane.Vars["pane_current_command"])
+			if detectedAgent == nil {
 				continue
 			}
 
@@ -82,17 +80,17 @@ var lsCmd = &cobra.Command{
 				continue
 			}
 
-			status := claude.ParseStatus(content)
-			if status.State == claude.StateUnknown {
+			status := detectedAgent.ParseStatus(content)
+			if status.State == agent.StateUnknown {
 				continue
 			}
 
 			switch status.State {
-			case claude.StateIdle:
+			case agent.StateIdle:
 				stats.IdleCount++
-			case claude.StateRunning:
+			case agent.StateRunning:
 				stats.RunningCount++
-			case claude.StateWaiting:
+			case agent.StateWaiting:
 				stats.WaitingCount++
 			}
 		}

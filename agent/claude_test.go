@@ -1,8 +1,9 @@
-package claude
+package agent
 
 import "testing"
 
-func TestMayBeTitle(t *testing.T) {
+func TestClaudeAgent_MayBeTitle(t *testing.T) {
+	agent := &ClaudeAgent{}
 	tests := []struct {
 		name  string
 		title string
@@ -17,18 +18,21 @@ func TestMayBeTitle(t *testing.T) {
 		{"Normal shell", "zsh", false},
 		{"Empty title", "", false},
 		{"Similar but not Claude", "* Task", false},
+		{"Copilot title", "GitHub Copilot", false},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := MayBeTitle(tt.title)
+			got := agent.MayBeTitle(tt.title)
 			if got != tt.want {
-				t.Errorf("MayBeTitle(%q) = %v, want %v", tt.title, got, tt.want)			}
+				t.Errorf("ClaudeAgent.MayBeTitle(%q) = %v, want %v", tt.title, got, tt.want)
+			}
 		})
 	}
 }
 
-func TestMayBeProcess(t *testing.T) {
+func TestClaudeAgent_MayBeProcess(t *testing.T) {
+	agent := &ClaudeAgent{}
 	tests := []struct {
 		name           string
 		currentCommand string
@@ -40,18 +44,21 @@ func TestMayBeProcess(t *testing.T) {
 		{"Bash shell", "bash", false},
 		{"Emacs", "emacs-30.1", false},
 		{"Empty", "", false},
+		{"Copilot binary", "copilot", false},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := MayBeProcess(tt.currentCommand)
+			got := agent.MayBeProcess(tt.currentCommand)
 			if got != tt.want {
-				t.Errorf("MayBeProcess(%q) = %v, want %v", tt.currentCommand, got, tt.want)			}
+				t.Errorf("ClaudeAgent.MayBeProcess(%q) = %v, want %v", tt.currentCommand, got, tt.want)
+			}
 		})
 	}
 }
 
-func TestExtractSummary(t *testing.T) {
+func TestClaudeAgent_ExtractSummary(t *testing.T) {
+	agent := &ClaudeAgent{}
 	tests := []struct {
 		name  string
 		title string
@@ -66,9 +73,10 @@ func TestExtractSummary(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := ExtractSummary(tt.title)
+			got := agent.ExtractSummary(tt.title)
 			if got != tt.want {
-				t.Errorf("ExtractSummary(%q) = %q, want %q", tt.title, got, tt.want)			}
+				t.Errorf("ClaudeAgent.ExtractSummary(%q) = %q, want %q", tt.title, got, tt.want)
+			}
 		})
 	}
 }

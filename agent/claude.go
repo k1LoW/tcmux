@@ -1,27 +1,26 @@
-package claude
+package agent
 
 import (
 	"strings"
 	"unicode"
 )
 
-// Claude Code title prefixes
-const (
-	claudePrefixIdle = "✳" // Idle state
-)
+// Claude Code title prefix
+const claudePrefixIdle = "✳" // Idle state
 
-// ClaudePane represents a Claude Code instance running in a tmux pane.
-type ClaudePane struct {
-	Session    string
-	Window     string
-	WindowName string
-	Summary    string
-	Status     Status
+// ClaudeAgent detects and parses Claude Code instances.
+type ClaudeAgent struct{}
+
+func (a *ClaudeAgent) Type() Type {
+	return TypeClaude
+}
+
+func (a *ClaudeAgent) Icon() string {
+	return "✻"
 }
 
 // MayBeTitle checks if the pane title may indicate a Claude Code instance.
-// Use together with MayBeProcess(currentCommand) to confirm.
-func MayBeTitle(title string) bool {
+func (a *ClaudeAgent) MayBeTitle(title string) bool {
 	if strings.HasPrefix(title, claudePrefixIdle) {
 		return true
 	}
@@ -42,13 +41,12 @@ func isBraillePattern(r rune) bool {
 
 // MayBeProcess checks if the current command may be a Claude Code process.
 // Claude Code runs as "node" (npm install) or "claude" (brew install --cask claude-code).
-// Use together with MayBeTitle(title) to confirm.
-func MayBeProcess(currentCommand string) bool {
+func (a *ClaudeAgent) MayBeProcess(currentCommand string) bool {
 	return currentCommand == "node" || currentCommand == "claude"
 }
 
 // ExtractSummary extracts the task summary from the pane title.
-func ExtractSummary(title string) string {
+func (a *ClaudeAgent) ExtractSummary(title string) string {
 	// Remove the "✳ " prefix
 	if strings.HasPrefix(title, claudePrefixIdle) {
 		summary := strings.TrimPrefix(title, claudePrefixIdle)
@@ -63,4 +61,9 @@ func ExtractSummary(title string) string {
 		}
 	}
 	return strings.TrimSpace(title)
+}
+
+// ParseStatus parses the pane content and determines the Claude Code status.
+func (a *ClaudeAgent) ParseStatus(content string) Status {
+	return parseClaudeStatus(content)
 }

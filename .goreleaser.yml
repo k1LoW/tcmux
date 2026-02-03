@@ -59,7 +59,7 @@ nfpms:
       - tcmux-linux
     homepage: https://github.com/k1LoW/tcmux
     maintainer: Ken'ichiro Oyama <k1lowxb@gmail.com>
-    description: "tcmux is a terminal and Claude Code mux viewer."
+    description: "tcmux is a terminal and coding agent mux viewer."
     license: MIT
     formats:
       - deb

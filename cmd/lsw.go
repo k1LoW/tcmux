@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/k1LoW/tcmux/claude"
+	"github.com/k1LoW/tcmux/agent"
 	"github.com/k1LoW/tcmux/output"
 	"github.com/k1LoW/tcmux/tmux"
 	"github.com/spf13/cobra"
@@ -22,8 +22,8 @@ var (
 var lswCmd = &cobra.Command{
 	Use:     "list-windows",
 	Aliases: []string{"lsw"},
-	Short:   "List Claude Code instances running in tmux windows",
-	Long:    `List Claude Code instances running in tmux windows with their status.`,
+	Short:   "List coding agent instances running in tmux windows",
+	Long:    `List coding agent instances (Claude Code, Copilot CLI) running in tmux windows with their status.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// Use format string if specified, otherwise use default
 		format := lswFormat
@@ -53,8 +53,8 @@ var lswCmd = &cobra.Command{
 
 		// Group panes by window
 		type windowData struct {
-			tmuxVars        map[string]string
-			claudeInstances []output.ClaudeInfo
+			tmuxVars       map[string]string
+			agentInstances []output.AgentInfo
 		}
 		var windowOrder []string
 		windows := make(map[string]*windowData)
@@ -71,21 +71,23 @@ var lswCmd = &cobra.Command{
 				windowOrder = append(windowOrder, windowKey)
 			}
 
-			// Check if this is a Claude Code pane
+			// Check if this is a coding agent pane
 			title := pane.Vars["pane_title"]
 			currentCommand := pane.Vars["pane_current_command"]
 
-			if claude.MayBeTitle(title) && claude.MayBeProcess(currentCommand) {
-				// Get Claude Code status
+			if detectedAgent := agent.Detect(title, currentCommand); detectedAgent != nil {
+				// Get coding agent status
 				paneID := pane.Vars["pane_id"]
 				content, err := tmux.CapturePane(ctx, paneID)
 				if err == nil {
-					status := claude.ParseStatus(content)
-					if status.State != claude.StateUnknown {
-						summary := claude.ExtractSummary(title)
-						windows[windowKey].claudeInstances = append(windows[windowKey].claudeInstances, output.ClaudeInfo{
-							Summary: summary,
-							Status:  status,
+					status := detectedAgent.ParseStatus(content)
+					if status.State != agent.StateUnknown {
+						summary := detectedAgent.ExtractSummary(title)
+						windows[windowKey].agentInstances = append(windows[windowKey].agentInstances, output.AgentInfo{
+							AgentType: detectedAgent.Type(),
+							Icon:      detectedAgent.Icon(),
+							Summary:   summary,
+							Status:    status,
 						})
 					}
 				}
@@ -97,15 +99,15 @@ var lswCmd = &cobra.Command{
 		for _, windowKey := range windowOrder {
 			win := windows[windowKey]
 
-			// Skip non-Claude Code windows unless -A is specified
-			if !allWindows && len(win.claudeInstances) == 0 {
+			// Skip non-agent windows unless -A is specified
+			if !allWindows && len(win.agentInstances) == 0 {
 				continue
 			}
 
 			// Expand format
 			ctx := &output.FormatContext{
-				TmuxVars:        win.tmuxVars,
-				ClaudeInstances: win.claudeInstances,
+				TmuxVars:       win.tmuxVars,
+				AgentInstances: win.agentInstances,
 			}
 
 			line := output.ExpandFormat(format, ctx)
@@ -118,7 +120,7 @@ var lswCmd = &cobra.Command{
 			if allWindows {
 				fmt.Println("No tmux windows found.")
 			} else {
-				fmt.Println("No Claude Code instances found.")
+				fmt.Println("No coding agent instances found.")
 			}
 			return nil
 		}
@@ -132,7 +134,7 @@ var lswCmd = &cobra.Command{
 }
 
 func init() {
-	lswCmd.Flags().BoolVarP(&allWindows, "all-windows", "A", false, "Show all windows, not just Claude Code")
+	lswCmd.Flags().BoolVarP(&allWindows, "all-windows", "A", false, "Show all windows, not just coding agents")
 	lswCmd.Flags().BoolVarP(&allSessions, "all-sessions", "a", false, "List windows from all sessions")
 	lswCmd.Flags().StringVarP(&target, "target-session", "t", "", "Specify target session")
 	lswCmd.Flags().StringVarP(&lswFormat, "format", "F", "", "Specify output format (tmux-compatible with tcmux extensions)")

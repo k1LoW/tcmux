@@ -21,6 +21,9 @@ var (
 
 	// Claude Code theme color (for branding/separators)
 	claudeThemeColor termenv.Color
+
+	// Copilot CLI theme color
+	copilotThemeColor termenv.Color
 )
 
 func init() {
@@ -29,12 +32,13 @@ func init() {
 
 func initOutput(o *termenv.Output) {
 	output = o
-	idleColor = output.Color("#00B359")        // Green
-	runningColor = output.Color("#E5A000")     // Orange/Yellow
-	waitingColor = output.Color("#5CC8FF")     // Cyan/Light blue - awaiting input
-	unknownColor = output.Color("#666666")     // Dark gray
-	modeColor = output.Color("#B366FF")        // Purple/Magenta
-	claudeThemeColor = output.Color("#E5A000") // Claude Code orange
+	idleColor = output.Color("#00B359")         // Green
+	runningColor = output.Color("#E5A000")      // Orange/Yellow
+	waitingColor = output.Color("#5CC8FF")      // Cyan/Light blue - awaiting input
+	unknownColor = output.Color("#666666")      // Dark gray
+	modeColor = output.Color("#B366FF")         // Purple/Magenta
+	claudeThemeColor = output.Color("#E5A000")  // Claude Code orange
+	copilotThemeColor = output.Color("#8534F3") // Copilot purple (official brand color)
 }
 
 // SetColorMode sets the color output mode: always, never, or auto.

@@ -3,7 +3,7 @@ package output
 import (
 	"testing"
 
-	"github.com/k1LoW/tcmux/claude"
+	"github.com/k1LoW/tcmux/agent"
 )
 
 func TestExtractTmuxVars(t *testing.T) {
@@ -79,37 +79,39 @@ func TestExpandFormat(t *testing.T) {
 			want: "0: editor",
 		},
 		{
-			name:   "Expand agent_status with status only",
+			name:   "Expand agent_status with status only (Claude)",
 			format: "#{agent_status}",
 			ctx: &FormatContext{
 				TmuxVars: map[string]string{},
-				ClaudeInstances: []ClaudeInfo{
-					{Summary: "", Status: claude.Status{State: claude.StateIdle}},
+				AgentInstances: []AgentInfo{
+					{AgentType: agent.TypeClaude, Icon: "✻", Summary: "", Status: agent.Status{State: agent.StateIdle}},
 				},
 			},
 			want: "✻ [Idle]",
 		},
 		{
-			name:   "Expand agent_status with summary and status",
+			name:   "Expand agent_status with summary and status (Claude)",
 			format: "#{agent_status}",
 			ctx: &FormatContext{
 				TmuxVars: map[string]string{},
-				ClaudeInstances: []ClaudeInfo{
-					{Summary: "Fix login bug", Status: claude.Status{State: claude.StateIdle}},
+				AgentInstances: []AgentInfo{
+					{AgentType: agent.TypeClaude, Icon: "✻", Summary: "Fix login bug", Status: agent.Status{State: agent.StateIdle}},
 				},
 			},
 			want: "✻ Fix login bug [Idle]",
 		},
 		{
-			name:   "Expand agent_status with full status",
+			name:   "Expand agent_status with full status (Claude)",
 			format: "#{agent_status}",
 			ctx: &FormatContext{
 				TmuxVars: map[string]string{},
-				ClaudeInstances: []ClaudeInfo{
+				AgentInstances: []AgentInfo{
 					{
-						Summary: "Fix login bug",
-						Status: claude.Status{
-							State:       claude.StateRunning,
+						AgentType: agent.TypeClaude,
+						Icon:      "✻",
+						Summary:   "Fix login bug",
+						Status: agent.Status{
+							State:       agent.StateRunning,
 							Description: "1m 30s",
 							Mode:        "plan mode",
 						},
@@ -122,21 +124,21 @@ func TestExpandFormat(t *testing.T) {
 			name:   "Empty agent_status when no instances",
 			format: "test #{agent_status}",
 			ctx: &FormatContext{
-				TmuxVars:        map[string]string{},
-				ClaudeInstances: []ClaudeInfo{},
+				TmuxVars:       map[string]string{},
+				AgentInstances: []AgentInfo{},
 			},
 			want: "test ",
 		},
 		{
-			name:   "Combined format",
+			name:   "Combined format (Claude)",
 			format: "#{window_index}: #{window_name} #{agent_status}",
 			ctx: &FormatContext{
 				TmuxVars: map[string]string{
 					"window_index": "0",
 					"window_name":  "editor",
 				},
-				ClaudeInstances: []ClaudeInfo{
-					{Summary: "Fix login bug", Status: claude.Status{State: claude.StateIdle}},
+				AgentInstances: []AgentInfo{
+					{AgentType: agent.TypeClaude, Icon: "✻", Summary: "Fix login bug", Status: agent.Status{State: agent.StateIdle}},
 				},
 			},
 			want: "0: editor ✻ Fix login bug [Idle]",
@@ -146,12 +148,35 @@ func TestExpandFormat(t *testing.T) {
 			format: "#{agent_status}",
 			ctx: &FormatContext{
 				TmuxVars: map[string]string{},
-				ClaudeInstances: []ClaudeInfo{
-					{Summary: "Fix login bug", Status: claude.Status{State: claude.StateIdle}},
-					{Summary: "Add API endpoint", Status: claude.Status{State: claude.StateRunning}},
+				AgentInstances: []AgentInfo{
+					{AgentType: agent.TypeClaude, Icon: "✻", Summary: "Fix login bug", Status: agent.Status{State: agent.StateIdle}},
+					{AgentType: agent.TypeClaude, Icon: "✻", Summary: "Add API endpoint", Status: agent.Status{State: agent.StateRunning}},
 				},
 			},
 			want: "✻ Fix login bug [Idle], ✻ Add API endpoint [Running]",
+		},
+		{
+			name:   "Copilot CLI instance",
+			format: "#{agent_status}",
+			ctx: &FormatContext{
+				TmuxVars: map[string]string{},
+				AgentInstances: []AgentInfo{
+					{AgentType: agent.TypeCopilot, Icon: "⬢", Summary: "", Status: agent.Status{State: agent.StateRunning}},
+				},
+			},
+			want: "⬢ [Running]",
+		},
+		{
+			name:   "Mixed agents",
+			format: "#{agent_status}",
+			ctx: &FormatContext{
+				TmuxVars: map[string]string{},
+				AgentInstances: []AgentInfo{
+					{AgentType: agent.TypeClaude, Icon: "✻", Summary: "Fix login bug", Status: agent.Status{State: agent.StateIdle}},
+					{AgentType: agent.TypeCopilot, Icon: "⬢", Summary: "", Status: agent.Status{State: agent.StateRunning}},
+				},
+			},
+			want: "✻ Fix login bug [Idle], ⬢ [Running]",
 		},
 	}
 
@@ -159,7 +184,8 @@ func TestExpandFormat(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			got := ExpandFormat(tt.format, tt.ctx)
 			if got != tt.want {
-				t.Errorf("ExpandFormat() = %q, want %q", got, tt.want)			}
+				t.Errorf("ExpandFormat() = %q, want %q", got, tt.want)
+			}
 		})
 	}
 }
@@ -192,7 +218,7 @@ func TestExpandSessionFormat(t *testing.T) {
 			want: "3 Idle",
 		},
 		{
-			name:   "Empty agent_status when no Claude Code",
+			name:   "Empty agent_status when no agents",
 			format: "#{agent_status}",
 			ctx: &SessionFormatContext{
 				TmuxVars: map[string]string{},
@@ -218,7 +244,8 @@ func TestExpandSessionFormat(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			got := ExpandSessionFormat(tt.format, tt.ctx)
 			if got != tt.want {
-				t.Errorf("ExpandSessionFormat() = %q, want %q", got, tt.want)			}
+				t.Errorf("ExpandSessionFormat() = %q, want %q", got, tt.want)
+			}
 		})
 	}
 }

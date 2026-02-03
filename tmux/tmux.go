@@ -34,7 +34,7 @@ func CapturePane(ctx context.Context, paneID string) (string, error) {
 	return string(out), nil
 }
 
-// InternalPaneVars are tmux variables required internally for Claude Code detection.
+// InternalPaneVars are tmux variables required internally for coding agent detection.
 var InternalPaneVars = []string{
 	"session_name",
 	"window_index",
