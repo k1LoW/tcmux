@@ -1,29 +1,8 @@
-package claude
+package agent
 
 import (
 	"regexp"
 	"strings"
-)
-
-// Status represents the status of a Claude Code instance.
-type Status struct {
-	State       string // Idle, Running, Completed, Unknown
-	Mode        string // plan mode, accept edits, or empty
-	Description string // Additional description (e.g., time elapsed)
-}
-
-// Status state constants
-const (
-	StateIdle    = "Idle"
-	StateRunning = "Running"
-	StateWaiting = "Waiting" // Agent is waiting for user input/selection
-	StateUnknown = "Unknown"
-)
-
-// Mode constants
-const (
-	ModePlan        = "plan mode"
-	ModeAcceptEdits = "accept edits"
 )
 
 var (
@@ -34,17 +13,17 @@ var (
 	// Time format: "30s", "1m 45s", "2m 10s", etc.
 	// Pattern must start at beginning of line to avoid matching quoted text
 	// Format 1: (esc to interrupt · 1m 45s · ...) - time after middle dot
-	runningPattern = regexp.MustCompile(`(?m)^[✢✽✶✻·]\s+.+?…?\s*\([^)]*·\s*((?:\d+[smh]\s*)+)`)
+	claudeRunningPattern = regexp.MustCompile(`(?m)^[✢✽✶✻·]\s+.+?…?\s*\([^)]*·\s*((?:\d+[smh]\s*)+)`)
 
 	// Format 2: (1m 52s · ...) - time at the beginning of parentheses
-	runningPatternTimeFirst = regexp.MustCompile(`(?m)^[✢✽✶✻·]\s+.+?…?\s*\(((?:\d+[smh]\s*)+)\s*·`)
+	claudeRunningPatternTimeFirst = regexp.MustCompile(`(?m)^[✢✽✶✻·]\s+.+?…?\s*\(((?:\d+[smh]\s*)+)\s*·`)
 
 	// "esc to interrupt" at the end of status line indicates Running
-	escToInterruptEndPattern = regexp.MustCompile(`(?m)·\s*esc to interrupt\s*$`)
+	claudeEscToInterruptEndPattern = regexp.MustCompile(`(?m)·\s*esc to interrupt\s*$`)
 
 	// Waiting patterns: Agent is asking for user input/selection
 	// From agent-deck: permission prompts, confirmation dialogs, etc.
-	waitingPatterns = []string{
+	claudeWaitingPatterns = []string{
 		"Yes, allow once",
 		"Yes, allow always",
 		"Allow once",
@@ -65,34 +44,34 @@ var (
 
 	// Selection menu pattern: numbered options with ❯ marker
 	// e.g., "❯ 1. Yes", "❯ 2. No"
-	selectionMenuPattern = regexp.MustCompile(`❯\s+\d+\.`)
+	claudeSelectionMenuPattern = regexp.MustCompile(`❯\s+\d+\.`)
 
 	// File changes status line pattern: "4 files +42 -0", "1 file +10 -5"
-	fileChangesPattern = regexp.MustCompile(`^\s*\d+\s+files?\s+[+-]`)
+	claudeFileChangesPattern = regexp.MustCompile(`^\s*\d+\s+files?\s+[+-]`)
 
 	// Plan mode pattern
-	planModePattern = regexp.MustCompile(`⏸\s+plan\s+mode\s+on`)
+	claudePlanModePattern = regexp.MustCompile(`⏸\s+plan\s+mode\s+on`)
 
 	// Accept edits pattern
-	acceptEditsPattern = regexp.MustCompile(`⏵⏵\s+accept\s+edits\s+on`)
+	claudeAcceptEditsPattern = regexp.MustCompile(`⏵⏵\s+accept\s+edits\s+on`)
 
 	// Idle pattern: prompt line (with or without completion suggestions)
 	// Note: Claude Code uses NBSP (U+00A0) after the prompt
 	// Allow optional leading whitespace for nested prompts
-	idlePattern = regexp.MustCompile(`(?m)^\s*❯`)
+	claudeIdlePattern = regexp.MustCompile(`(?m)^\s*❯`)
 
 	// Interview mode pattern: Claude Code asking user to select from options
-	interviewPattern = regexp.MustCompile(`Enter to select.*↑/↓ to navigate.*Esc to cancel`)
+	claudeInterviewPattern = regexp.MustCompile(`Enter to select.*↑/↓ to navigate.*Esc to cancel`)
 
 	// Running fallback pattern (from agent-deck)
 	// Matches Claude Code status line: ✻ Verb… (esc to interrupt) or (ctrl+c to interrupt)
 	// Must start at beginning of line to avoid matching quoted text
 	// Action text may contain spaces
-	runningFallbackPattern = regexp.MustCompile(`(?m)^[✢✽✶✻·]\s+.+?…?\s*\((esc|ctrl\+c) to interrupt`)
+	claudeRunningFallbackPattern = regexp.MustCompile(`(?m)^[✢✽✶✻·]\s+.+?…?\s*\((esc|ctrl\+c) to interrupt`)
 )
 
-// ParseStatus parses the pane content and determines the status.
-func ParseStatus(content string) Status {
+// parseClaudeStatus parses the pane content and determines the Claude Code status.
+func parseClaudeStatus(content string) Status {
 	// Get the last non-empty lines for analysis
 	lines := strings.Split(content, "\n")
 
@@ -108,22 +87,22 @@ func ParseStatus(content string) Status {
 	}
 
 	// Check for modes first
-	if planModePattern.MatchString(combined) {
+	if claudePlanModePattern.MatchString(combined) {
 		status.Mode = ModePlan
-	} else if acceptEditsPattern.MatchString(combined) {
+	} else if claudeAcceptEditsPattern.MatchString(combined) {
 		status.Mode = ModeAcceptEdits
 	}
 
 	// Check for running state (primary pattern with time extraction)
 	// Format 1: (esc to interrupt · 1m 45s · ...) - time after middle dot
-	if matches := runningPattern.FindStringSubmatch(combined); len(matches) > 0 {
+	if matches := claudeRunningPattern.FindStringSubmatch(combined); len(matches) > 0 {
 		status.State = StateRunning
 		status.Description = strings.TrimSpace(matches[1]) // Time elapsed
 		return status
 	}
 
 	// Format 2: (1m 52s · ...) - time at the beginning of parentheses
-	if matches := runningPatternTimeFirst.FindStringSubmatch(combined); len(matches) > 0 {
+	if matches := claudeRunningPatternTimeFirst.FindStringSubmatch(combined); len(matches) > 0 {
 		status.State = StateRunning
 		status.Description = strings.TrimSpace(matches[1]) // Time elapsed
 		return status
@@ -131,44 +110,44 @@ func ParseStatus(content string) Status {
 
 	// Check for running state (fallback pattern without time)
 	// This ensures "esc to interrupt" is detected as Running even without time info
-	if runningFallbackPattern.MatchString(combined) {
+	if claudeRunningFallbackPattern.MatchString(combined) {
 		status.State = StateRunning
 		return status
 	}
 
 	// Check for "esc to interrupt" at end of status line (e.g., "4 files +20 -0 · esc to interrupt")
-	if escToInterruptEndPattern.MatchString(combined) {
+	if claudeEscToInterruptEndPattern.MatchString(combined) {
 		status.State = StateRunning
 		return status
 	}
 
 	// Check for idle state first: if the last meaningful line is a prompt,
 	// then the agent is idle (even if there are dialogs/overlays above)
-	if isPromptLine(lines) {
+	if isClaudePromptLine(lines) {
 		status.State = StateIdle
 		return status
 	}
 
 	// Check for waiting state (agent asking for user input/selection)
 	// This includes permission prompts, confirmation dialogs, interview mode
-	for _, pattern := range waitingPatterns {
+	for _, pattern := range claudeWaitingPatterns {
 		if strings.Contains(combined, pattern) {
 			status.State = StateWaiting
 			return status
 		}
 	}
-	if interviewPattern.MatchString(combined) {
+	if claudeInterviewPattern.MatchString(combined) {
 		status.State = StateWaiting
 		return status
 	}
 	// Selection menu with numbered options (❯ 1. Yes, ❯ 2. No, etc.)
-	if selectionMenuPattern.MatchString(combined) {
+	if claudeSelectionMenuPattern.MatchString(combined) {
 		status.State = StateWaiting
 		return status
 	}
 
 	// Fallback: check for idle state using pattern match
-	if idlePattern.MatchString(combined) {
+	if claudeIdlePattern.MatchString(combined) {
 		status.State = StateIdle
 		return status
 	}
@@ -176,27 +155,9 @@ func ParseStatus(content string) Status {
 	return status
 }
 
-// lastNonEmptyLines returns the last n non-empty lines.
-// It skips lines that are only separators (─, ═, etc.).
-func lastNonEmptyLines(lines []string, n int) []string {
-	var result []string
-	for i := len(lines) - 1; i >= 0 && len(result) < n; i-- {
-		line := strings.TrimSpace(lines[i])
-		if line == "" {
-			continue
-		}
-		// Skip separator lines (lines consisting only of box-drawing characters)
-		if isSeparatorLine(line) {
-			continue
-		}
-		result = append([]string{lines[i]}, result...)
-	}
-	return result
-}
-
-// isPromptLine checks if the last non-empty, non-separator line is a prompt.
+// isClaudePromptLine checks if the last non-empty, non-separator line is a prompt.
 // This helps distinguish between "at prompt" vs "prompt visible but not at end".
-func isPromptLine(lines []string) bool {
+func isClaudePromptLine(lines []string) bool {
 	// Find the last meaningful line (not empty, not separator, not help text)
 	for i := len(lines) - 1; i >= 0; i-- {
 		line := strings.TrimSpace(lines[i])
@@ -210,7 +171,7 @@ func isPromptLine(lines []string) bool {
 		if strings.Contains(line, "? for shortcuts") ||
 			strings.Contains(line, "ctrl+") ||
 			strings.Contains(line, "shift+") ||
-			fileChangesPattern.MatchString(line) {
+			claudeFileChangesPattern.MatchString(line) {
 			continue
 		}
 		// Check if this line is a prompt
@@ -218,7 +179,7 @@ func isPromptLine(lines []string) bool {
 		// But NOT selection menu markers like "❯ 1. Yes"
 		if strings.HasPrefix(line, "❯") {
 			// Check if it's a selection menu marker (❯ followed by number and dot)
-			if selectionMenuPattern.MatchString(line) {
+			if claudeSelectionMenuPattern.MatchString(line) {
 				return false
 			}
 			return true
@@ -227,15 +188,4 @@ func isPromptLine(lines []string) bool {
 		return false
 	}
 	return false
-}
-
-// isSeparatorLine checks if a line consists only of box-drawing characters.
-func isSeparatorLine(line string) bool {
-	for _, r := range line {
-		// Box-drawing characters range: U+2500 to U+257F
-		if r < 0x2500 || r > 0x257F {
-			return false
-		}
-	}
-	return true
 }

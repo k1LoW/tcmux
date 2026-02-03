@@ -1,14 +1,15 @@
-package claude
+package agent
 
 import "testing"
 
-func TestParseStatus(t *testing.T) {
+func TestClaudeAgent_ParseStatus(t *testing.T) {
+	agent := &ClaudeAgent{}
 	tests := []struct {
-		name        string
-		content     string
-		wantState   string
-		wantMode    string
-		wantDesc    string
+		name      string
+		content   string
+		wantState string
+		wantMode  string
+		wantDesc  string
 	}{
 		{
 			name: "Idle with prompt only",
@@ -364,8 +365,8 @@ without any recognizable pattern`,
 			wantDesc:  "",
 		},
 		{
-			name: "Empty content",
-			content: "",
+			name:      "Empty content",
+			content:   "",
 			wantState: StateUnknown,
 			wantMode:  "",
 			wantDesc:  "",
@@ -374,13 +375,16 @@ without any recognizable pattern`,
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := ParseStatus(tt.content)
+			got := agent.ParseStatus(tt.content)
 			if got.State != tt.wantState {
-				t.Errorf("ParseStatus().State = %q, want %q", got.State, tt.wantState)			}
+				t.Errorf("ClaudeAgent.ParseStatus().State = %q, want %q", got.State, tt.wantState)
+			}
 			if got.Mode != tt.wantMode {
-				t.Errorf("ParseStatus().Mode = %q, want %q", got.Mode, tt.wantMode)			}
+				t.Errorf("ClaudeAgent.ParseStatus().Mode = %q, want %q", got.Mode, tt.wantMode)
+			}
 			if got.Description != tt.wantDesc {
-				t.Errorf("ParseStatus().Description = %q, want %q", got.Description, tt.wantDesc)			}
+				t.Errorf("ClaudeAgent.ParseStatus().Description = %q, want %q", got.Description, tt.wantDesc)
+			}
 		})
 	}
 }

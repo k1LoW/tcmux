@@ -5,7 +5,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/k1LoW/tcmux/claude"
+	"github.com/k1LoW/tcmux/agent"
 	"github.com/muesli/termenv"
 )
 
@@ -24,10 +24,12 @@ var (
 	}
 )
 
-// ClaudeInfo holds info for a single Claude Code instance.
-type ClaudeInfo struct {
-	Summary string
-	Status  claude.Status
+// AgentInfo holds info for a single coding agent instance.
+type AgentInfo struct {
+	AgentType agent.Type
+	Icon      string
+	Summary   string
+	Status    agent.Status
 }
 
 // FormatContext holds data for format expansion.
@@ -35,8 +37,8 @@ type FormatContext struct {
 	// tmux variables (from tmux -F output)
 	TmuxVars map[string]string
 
-	// Claude Code instances in the window
-	ClaudeInstances []ClaudeInfo
+	// Coding agent instances in the window
+	AgentInstances []AgentInfo
 }
 
 // SessionFormatContext holds data for session format expansion.
@@ -44,7 +46,7 @@ type SessionFormatContext struct {
 	// tmux variables
 	TmuxVars map[string]string
 
-	// Claude Code stats
+	// Coding agent stats
 	IdleCount    int
 	RunningCount int
 	WaitingCount int
@@ -85,7 +87,7 @@ func ExpandFormat(format string, ctx *FormatContext) string {
 
 		switch varName {
 		case VarAgentStatus:
-			return formatAgentStatus(ctx.ClaudeInstances)
+			return formatAgentStatus(ctx.AgentInstances)
 		default:
 			// tmux variable - use value from TmuxVars
 			if val, ok := ctx.TmuxVars[varName]; ok {
@@ -121,30 +123,40 @@ func ExpandSessionFormat(format string, ctx *SessionFormatContext) string {
 }
 
 // formatAgentStatus formats the full coding agent status string for multiple instances.
-// Format: "✻ summary [Status (description, mode)], ✻ summary2 [Status2]"
+// Format: "✻ summary [Status (description, mode)], ⬢ summary2 [Status2]"
 // Returns empty string if no coding agent instances.
-func formatAgentStatus(instances []ClaudeInfo) string {
+func formatAgentStatus(instances []AgentInfo) string {
 	if len(instances) == 0 {
 		return ""
 	}
 
 	var instanceParts []string
 	for _, inst := range instances {
-		if inst.Status.State == "" || inst.Status.State == claude.StateUnknown {
+		if inst.Status.State == "" || inst.Status.State == agent.StateUnknown {
 			continue
 		}
 
-		// Get the color for the state
+		// Get the color for the state and agent theme
 		var stateColor termenv.Color
+		var themeColor termenv.Color
 		switch inst.Status.State {
-		case claude.StateIdle:
+		case agent.StateIdle:
 			stateColor = idleColor
-		case claude.StateRunning:
+		case agent.StateRunning:
 			stateColor = runningColor
-		case claude.StateWaiting:
+		case agent.StateWaiting:
 			stateColor = waitingColor
 		default:
 			stateColor = unknownColor
+		}
+
+		switch inst.AgentType {
+		case agent.TypeClaude:
+			themeColor = claudeThemeColor
+		case agent.TypeCopilot:
+			themeColor = copilotThemeColor
+		default:
+			themeColor = claudeThemeColor
 		}
 
 		// Build the status string with colors
@@ -173,7 +185,7 @@ func formatAgentStatus(instances []ClaudeInfo) string {
 		}
 		parts = append(parts, fmt.Sprintf("[%s]", statusPart))
 
-		separator := output.String("✻").Foreground(claudeThemeColor).String()
+		separator := output.String(inst.Icon).Foreground(themeColor).String()
 		instanceParts = append(instanceParts, separator+" "+strings.Join(parts, " "))
 	}
 
