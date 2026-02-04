@@ -357,6 +357,29 @@ Enter to select · ↑/↓ to navigate · Esc to cancel`,
 			wantDesc:  "52s",
 		},
 		{
+			name: "Running with esc to interrupt followed by ctrl+t to hide tasks",
+			content: `⏺ Some output here.
+
+✻ Cooked for 40s
+
+❯ Previous user input
+
+⏺ Starting implementation.
+
+✳ Thinking…
+  ⎿  ◻ Task 1
+     ◻ Task 2
+     ◻ Task 3
+
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+❯
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  some-command --help 2>/d… (running) · 2 files +0 -0 · esc to interrupt · ctrl+t to hide tasks`,
+			wantState: StateRunning,
+			wantMode:  "",
+			wantDesc:  "",
+		},
+		{
 			name: "Unknown state",
 			content: `Some random output
 without any recognizable pattern`,

@@ -18,8 +18,8 @@ var (
 	// Format 2: (1m 52s · ...) - time at the beginning of parentheses
 	claudeRunningPatternTimeFirst = regexp.MustCompile(`(?m)^[✢✽✶✻·]\s+.+?…?\s*\(((?:\d+[smh]\s*)+)\s*·`)
 
-	// "esc to interrupt" at the end of status line indicates Running
-	claudeEscToInterruptEndPattern = regexp.MustCompile(`(?m)·\s*esc to interrupt\s*$`)
+	// "esc to interrupt" in status line indicates Running (may have trailing content like "ctrl+t to hide tasks")
+	claudeEscToInterruptEndPattern = regexp.MustCompile(`(?m)·\s*esc to interrupt(\s|·|$)`)
 
 	// Waiting patterns: Agent is asking for user input/selection
 	// From agent-deck: permission prompts, confirmation dialogs, etc.
