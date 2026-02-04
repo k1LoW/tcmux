@@ -1,5 +1,7 @@
 # Changelog
 
+## [v0.3.1](https://github.com/k1LoW/tcmux/compare/v0.3.0...v0.3.1) - 2026-02-04
+
 ## [v0.3.0](https://github.com/k1LoW/tcmux/compare/v0.2.3...v0.3.0) - 2026-02-03
 - feat: add GitHub Copilot CLI support by @k1LoW in https://github.com/k1LoW/tcmux/pull/11
 
