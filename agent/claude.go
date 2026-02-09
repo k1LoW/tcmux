@@ -1,6 +1,7 @@
 package agent
 
 import (
+	"regexp"
 	"strings"
 	"unicode"
 )
@@ -39,10 +40,15 @@ func isBraillePattern(r rune) bool {
 	return unicode.In(r, unicode.Braille)
 }
 
+// claudeVersionPattern matches semver-like version strings (e.g., "2.1.34").
+// Native Install of Claude Code reports its version as pane_current_command.
+var claudeVersionPattern = regexp.MustCompile(`^\d+\.\d+`)
+
 // MayBeProcess checks if the current command may be a Claude Code process.
-// Claude Code runs as "node" (npm install) or "claude" (brew install --cask claude-code).
+// Claude Code runs as "node" (npm install), "claude" (brew install --cask claude-code),
+// or a version string like "2.1.34" (Native Install).
 func (a *ClaudeAgent) MayBeProcess(currentCommand string) bool {
-	return currentCommand == "node" || currentCommand == "claude"
+	return currentCommand == "node" || currentCommand == "claude" || claudeVersionPattern.MatchString(currentCommand)
 }
 
 // ExtractSummary extracts the task summary from the pane title.

@@ -29,6 +29,12 @@ func TestDetect(t *testing.T) {
 			wantType:       TypeClaude,
 		},
 		{
+			name:           "Claude Code with version string (Native Install)",
+			title:          "✳ Task summary",
+			currentCommand: "2.1.34",
+			wantType:       TypeClaude,
+		},
+		{
 			name:           "Copilot CLI with default title",
 			title:          "GitHub Copilot",
 			currentCommand: "copilot",
