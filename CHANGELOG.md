@@ -1,5 +1,8 @@
 # Changelog
 
+## [v0.3.2](https://github.com/k1LoW/tcmux/compare/v0.3.1...v0.3.2) - 2026-02-09
+- fix: detect Claude Code in Native Install where pane_current_command is a version string by @k1LoW in https://github.com/k1LoW/tcmux/pull/16
+
 ## [v0.3.1](https://github.com/k1LoW/tcmux/compare/v0.3.0...v0.3.1) - 2026-02-04
 
 ## [v0.3.0](https://github.com/k1LoW/tcmux/compare/v0.2.3...v0.3.0) - 2026-02-03
