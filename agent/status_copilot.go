@@ -19,6 +19,9 @@ var (
 		"Confirm with number keys",
 		"Cancel with Esc",
 	}
+
+	// Plan mode pattern: "plan mode · shift+tab cycle mode" in footer
+	copilotPlanModePattern = regexp.MustCompile(`plan mode\s*·`)
 )
 
 // parseCopilotStatus parses the pane content and determines the Copilot CLI status.
@@ -33,6 +36,11 @@ func parseCopilotStatus(content string) Status {
 		State:       StateUnknown,
 		Mode:        "",
 		Description: "",
+	}
+
+	// Check for plan mode first
+	if copilotPlanModePattern.MatchString(combined) {
+		status.Mode = ModePlan
 	}
 
 	// Check for running state: "(Esc to cancel" indicates Copilot is processing

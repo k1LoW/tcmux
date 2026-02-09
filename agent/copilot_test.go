@@ -79,6 +79,7 @@ func TestCopilotAgent_ParseStatus(t *testing.T) {
 		name      string
 		content   string
 		wantState string
+		wantMode  string
 	}{
 		{
 			name: "Running with Esc to cancel in parentheses",
@@ -167,6 +168,36 @@ without any recognizable pattern`,
 			content:   "",
 			wantState: StateUnknown,
 		},
+		{
+			name: "Plan mode with Running state",
+			content: `● Read proto/private/controlplane/idp/v1/resource.proto lines 1-50
+  └ 55 lines read
+
+● Read service/idp/dataplane/op/google_oauth.go
+  └ 309 lines read
+
+◎ Creating review plan (Esc to cancel · 60 B)
+
+ ~/src/github.com/tailor-inc/platform-core-services/.worktrees/idp-google-oauth[⎇ idp-google-oauth*]                                                                claude-sonnet-4.5 (1x)
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+❯  Type @ to mention files or / for commands
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ plan mode · shift+tab cycle mode                                                                                                                                Remaining requests: 81.4%`,
+			wantState: StateRunning,
+			wantMode:  ModePlan,
+		},
+		{
+			name: "Plan mode with Idle state",
+			content: `Some previous output
+
+ ~/src/github.com/project
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+❯  Type @ to mention files or / for commands
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ plan mode · shift+tab cycle mode`,
+			wantState: StateIdle,
+			wantMode:  ModePlan,
+		},
 	}
 
 	for _, tt := range tests {
@@ -174,6 +205,9 @@ without any recognizable pattern`,
 			got := agent.ParseStatus(tt.content)
 			if got.State != tt.wantState {
 				t.Errorf("CopilotAgent.ParseStatus().State = %q, want %q", got.State, tt.wantState)
+			}
+			if got.Mode != tt.wantMode {
+				t.Errorf("CopilotAgent.ParseStatus().Mode = %q, want %q", got.Mode, tt.wantMode)
 			}
 		})
 	}
