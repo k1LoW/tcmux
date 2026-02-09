@@ -40,6 +40,8 @@ func TestClaudeAgent_MayBeProcess(t *testing.T) {
 	}{
 		{"Node process", "node", true},
 		{"Claude binary", "claude", true},
+		{"Version string (Native Install)", "2.1.34", true},
+		{"Version string current", "2.1.37", true},
 		{"Zsh shell", "zsh", false},
 		{"Bash shell", "bash", false},
 		{"Emacs", "emacs-30.1", false},
