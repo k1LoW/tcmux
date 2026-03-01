@@ -249,3 +249,102 @@ func TestExpandSessionFormat(t *testing.T) {
 		})
 	}
 }
+
+func TestExpandStatsFormat(t *testing.T) {
+	tests := []struct {
+		name   string
+		format string
+		ctx    *TotalStatsContext
+		want   string
+	}{
+		{
+			name:   "Expand total_idle",
+			format: "#{total_idle}",
+			ctx: &TotalStatsContext{
+				IdleCount:    3,
+				RunningCount: 2,
+				WaitingCount: 1,
+			},
+			want: "3",
+		},
+		{
+			name:   "Expand total_running",
+			format: "#{total_running}",
+			ctx: &TotalStatsContext{
+				IdleCount:    3,
+				RunningCount: 2,
+				WaitingCount: 1,
+			},
+			want: "2",
+		},
+		{
+			name:   "Expand total_waiting",
+			format: "#{total_waiting}",
+			ctx: &TotalStatsContext{
+				IdleCount:    3,
+				RunningCount: 2,
+				WaitingCount: 1,
+			},
+			want: "1",
+		},
+		{
+			name:   "Expand total_agents",
+			format: "#{total_agents}",
+			ctx: &TotalStatsContext{
+				IdleCount:    3,
+				RunningCount: 2,
+				WaitingCount: 1,
+			},
+			want: "6",
+		},
+		{
+			name:   "Expand agent_status",
+			format: "#{agent_status}",
+			ctx: &TotalStatsContext{
+				IdleCount:    3,
+				RunningCount: 2,
+				WaitingCount: 1,
+			},
+			want: "3 Idle, 2 Running, 1 Waiting",
+		},
+		{
+			name:   "Custom format with multiple variables",
+			format: "W:#{total_waiting} R:#{total_running} I:#{total_idle}",
+			ctx: &TotalStatsContext{
+				IdleCount:    3,
+				RunningCount: 2,
+				WaitingCount: 1,
+			},
+			want: "W:1 R:2 I:3",
+		},
+		{
+			name:   "Zero counts",
+			format: "W:#{total_waiting} R:#{total_running} I:#{total_idle}",
+			ctx: &TotalStatsContext{
+				IdleCount:    0,
+				RunningCount: 0,
+				WaitingCount: 0,
+			},
+			want: "W:0 R:0 I:0",
+		},
+		{
+			name:   "Empty agent_status when no agents",
+			format: "#{agent_status}",
+			ctx: &TotalStatsContext{
+				IdleCount:    0,
+				RunningCount: 0,
+				WaitingCount: 0,
+			},
+			want: "",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := ExpandStatsFormat(tt.format, tt.ctx)
+			if got != tt.want {
+				t.Errorf("ExpandStatsFormat() = %q, want %q", got, tt.want)
+			}
+		})
+	}
+}

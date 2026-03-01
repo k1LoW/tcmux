@@ -11,7 +11,11 @@ import (
 
 // tcmux custom format variables
 const (
-	VarAgentStatus = "agent_status" // Coding agent status (context-dependent output)
+	VarAgentStatus  = "agent_status"  // Coding agent status (context-dependent output)
+	VarTotalIdle    = "total_idle"    // Total idle count
+	VarTotalRunning = "total_running" // Total running count
+	VarTotalWaiting = "total_waiting" // Total waiting count
+	VarTotalAgents  = "total_agents"  // Total agent count
 )
 
 var (
@@ -20,7 +24,11 @@ var (
 
 	// tcmux custom variables
 	tcmuxVars = map[string]bool{
-		VarAgentStatus: true,
+		VarAgentStatus:  true,
+		VarTotalIdle:    true,
+		VarTotalRunning: true,
+		VarTotalWaiting: true,
+		VarTotalAgents:  true,
 	}
 )
 
@@ -47,6 +55,15 @@ type SessionFormatContext struct {
 	TmuxVars map[string]string
 
 	// Coding agent stats
+	IdleCount    int
+	RunningCount int
+	WaitingCount int
+}
+
+// TotalStatsContext holds data for total stats format expansion.
+// Note: TmuxVars is not included because stats aggregates across all sessions,
+// so there is no specific session/window context to reference.
+type TotalStatsContext struct {
 	IdleCount    int
 	RunningCount int
 	WaitingCount int
@@ -115,6 +132,32 @@ func ExpandSessionFormat(format string, ctx *SessionFormatContext) string {
 			if val, ok := ctx.TmuxVars[varName]; ok {
 				return val
 			}
+			return match
+		}
+	})
+
+	return result
+}
+
+// ExpandStatsFormat expands a format string for total stats.
+func ExpandStatsFormat(format string, ctx *TotalStatsContext) string {
+	result := format
+
+	result = formatVarPattern.ReplaceAllStringFunc(result, func(match string) string {
+		varName := match[2 : len(match)-1]
+
+		switch varName {
+		case VarAgentStatus:
+			return formatAgentStats(ctx.IdleCount, ctx.RunningCount, ctx.WaitingCount)
+		case VarTotalIdle:
+			return fmt.Sprintf("%d", ctx.IdleCount)
+		case VarTotalRunning:
+			return fmt.Sprintf("%d", ctx.RunningCount)
+		case VarTotalWaiting:
+			return fmt.Sprintf("%d", ctx.WaitingCount)
+		case VarTotalAgents:
+			return fmt.Sprintf("%d", ctx.IdleCount+ctx.RunningCount+ctx.WaitingCount)
+		default:
 			return match
 		}
 	})
