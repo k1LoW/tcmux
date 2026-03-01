@@ -71,9 +71,14 @@ tcmux supports all tmux format variables (e.g., `#{window_index}`, `#{window_nam
 | Variable | Description |
 |----------|-------------|
 | `#{agent_status}` | Coding agent status (context-dependent) |
+| `#{total_idle}` | Total idle count (stats only) |
+| `#{total_running}` | Total running count (stats only) |
+| `#{total_waiting}` | Total waiting count (stats only) |
+| `#{total_agents}` | Total agent count (stats only) |
 
 - **list-windows:** `✻ Fix login bug [Idle], ⬢ Review PR [Running]`
 - **list-sessions:** `2 Idle, 1 Running`
+- **stats:** `4 Idle, 1 Running, 1 Waiting`
 
 **Example:**
 
