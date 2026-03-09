@@ -2,7 +2,7 @@
 
 `tcmux` is a **t**erminal and **c**oding agent **mux** viewer.
 
-Supports [Claude Code](https://claude.ai/code), [GitHub Copilot CLI](https://github.com/github/copilot-cli), and Codex.
+Supports [Claude Code](https://claude.ai/code), [GitHub Copilot CLI](https://github.com/github/copilot-cli), and [Codex CLI](https://github.com/openai/codex).
 
 ## Usage
 
@@ -36,7 +36,7 @@ work: 1 window
 |-------|------|-----------|
 | Claude Code | ✻ | pane title starts with `✳` or Braille spinner, process is `claude` or `node` |
 | GitHub Copilot CLI | ⬢ | process is `copilot` |
-| Codex | ❂ | process name starts with `codex` (e.g. `codex`, `codex-aarch64-a`) |
+| Codex CLI | ❂ | process name starts with `codex` (e.g. `codex`, `codex-aarch64-a`) |
 
 ### Options
 
