@@ -12,7 +12,7 @@ var colorMode string
 var rootCmd = &cobra.Command{
 	Use:   "tcmux",
 	Short: "terminal and coding agent mux viewer",
-	Long:  `tcmux is a terminal and coding agent mux viewer (supports Claude Code, Copilot CLI).`,
+	Long:  `tcmux is a terminal and coding agent mux viewer (supports Claude Code, Copilot CLI, and Codex CLI).`,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		return output.SetColorMode(colorMode)
 	},

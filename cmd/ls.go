@@ -19,7 +19,7 @@ var lsCmd = &cobra.Command{
 	Use:     "list-sessions",
 	Aliases: []string{"ls"},
 	Short:   "List tmux sessions with coding agent status",
-	Long:    `List tmux sessions with coding agent status (Claude Code, Copilot CLI).`,
+	Long:    `List tmux sessions with coding agent status (Claude Code, Copilot CLI, and Codex CLI).`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// Use format string if specified, otherwise use default
 		format := lsFormat

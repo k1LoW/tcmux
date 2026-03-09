@@ -23,7 +23,7 @@ var lswCmd = &cobra.Command{
 	Use:     "list-windows",
 	Aliases: []string{"lsw"},
 	Short:   "List coding agent instances running in tmux windows",
-	Long:    `List coding agent instances (Claude Code, Copilot CLI) running in tmux windows with their status.`,
+	Long:    `List coding agent instances (Claude Code, Copilot CLI, and Codex CLI) running in tmux windows with their status.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// Use format string if specified, otherwise use default
 		format := lswFormat

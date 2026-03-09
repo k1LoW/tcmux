@@ -155,6 +155,8 @@ func formatAgentStatus(instances []AgentInfo) string {
 			themeColor = claudeThemeColor
 		case agent.TypeCopilot:
 			themeColor = copilotThemeColor
+		case agent.TypeCodex:
+			themeColor = codexThemeColor
 		default:
 			themeColor = claudeThemeColor
 		}

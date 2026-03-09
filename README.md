@@ -2,7 +2,7 @@
 
 `tcmux` is a **t**erminal and **c**oding agent **mux** viewer.
 
-Supports [Claude Code](https://claude.ai/code) and [GitHub Copilot CLI](https://github.com/github/copilot-cli).
+Supports [Claude Code](https://claude.ai/code), [GitHub Copilot CLI](https://github.com/github/copilot-cli), and [Codex CLI](https://github.com/openai/codex).
 
 ## Usage
 
@@ -12,6 +12,7 @@ $ tcmux list-windows  # List coding agent instances in tmux windows (alias: lsw)
 2: server (2 panes) ✻ Add API endpoint [Running (1m 30s)], ✻ Write tests [Idle]
 5: docs (1 panes) ✻ Update README [Idle]
 7: review (1 panes) ⬢ Review PR [Waiting]
+8: codex (1 panes) ❂ Refactor parser [Running]
 
 $ tcmux list-windows -A  # Show all windows, not just coding agents
 0: editor (1 panes) ✻ Fix login bug [Idle]
@@ -21,6 +22,7 @@ $ tcmux list-windows -A  # Show all windows, not just coding agents
 4: htop (1 panes)
 5: docs (1 panes) ✻ Update README [Idle]
 7: review (1 panes) ⬢ Review PR [Waiting]
+8: codex (1 panes) ❂ Refactor parser [Running]
 
 $ tcmux list-sessions  # List tmux sessions with coding agent status (alias: ls)
 dev: 7 windows (attached) - 3 Idle, 1 Running, 1 Waiting
@@ -34,6 +36,7 @@ work: 1 window
 |-------|------|-----------|
 | Claude Code | ✻ | pane title starts with `✳` or Braille spinner, process is `claude` or `node` |
 | GitHub Copilot CLI | ⬢ | process is `copilot` |
+| Codex CLI | ❂ | process name starts with `codex` (e.g. `codex`, `codex-aarch64-a`) |
 
 ### Options
 
@@ -60,7 +63,7 @@ tcmux supports all tmux format variables (e.g., `#{window_index}`, `#{window_nam
 |----------|-------------|
 | `#{agent_status}` | Coding agent status (context-dependent) |
 
-- **list-windows:** `✻ Fix login bug [Idle], ⬢ Review PR [Running]`
+- **list-windows:** `✻ Fix login bug [Idle], ⬢ Review PR [Running], ❂ Refactor parser [Running (plan mode)]`
 - **list-sessions:** `2 Idle, 1 Running`
 
 **Example:**

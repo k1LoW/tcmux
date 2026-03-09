@@ -167,6 +167,17 @@ func TestExpandFormat(t *testing.T) {
 			want: "⬢ [Running]",
 		},
 		{
+			name:   "Codex CLI instance",
+			format: "#{agent_status}",
+			ctx: &FormatContext{
+				TmuxVars: map[string]string{},
+				AgentInstances: []AgentInfo{
+					{AgentType: agent.TypeCodex, Icon: "❂", Summary: "Refactor parser", Status: agent.Status{State: agent.StateIdle}},
+				},
+			},
+			want: "❂ Refactor parser [Idle]",
+		},
+		{
 			name:   "Mixed agents",
 			format: "#{agent_status}",
 			ctx: &FormatContext{
@@ -174,9 +185,10 @@ func TestExpandFormat(t *testing.T) {
 				AgentInstances: []AgentInfo{
 					{AgentType: agent.TypeClaude, Icon: "✻", Summary: "Fix login bug", Status: agent.Status{State: agent.StateIdle}},
 					{AgentType: agent.TypeCopilot, Icon: "⬢", Summary: "", Status: agent.Status{State: agent.StateRunning}},
+					{AgentType: agent.TypeCodex, Icon: "❂", Summary: "", Status: agent.Status{State: agent.StateWaiting}},
 				},
 			},
-			want: "✻ Fix login bug [Idle], ⬢ [Running]",
+			want: "✻ Fix login bug [Idle], ⬢ [Running], ❂ [Waiting]",
 		},
 	}
 

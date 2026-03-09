@@ -47,6 +47,12 @@ func TestDetect(t *testing.T) {
 			wantType:       TypeCopilot,
 		},
 		{
+			name:           "Codex CLI",
+			title:          "Codex",
+			currentCommand: "codex",
+			wantType:       TypeCodex,
+		},
+		{
 			name:           "Normal shell",
 			title:          "zsh",
 			currentCommand: "zsh",
