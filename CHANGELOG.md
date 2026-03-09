@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.4.0](https://github.com/k1LoW/tcmux/compare/v0.3.2...v0.4.0) - 2026-03-09
+- feat: add Codex CLI support to tcmux by @k1LoW in https://github.com/k1LoW/tcmux/pull/18
+- feat: add `stats` command for aggregated agent statistics by @hiro-o918 in https://github.com/k1LoW/tcmux/pull/17
+
 ## [v0.3.2](https://github.com/k1LoW/tcmux/compare/v0.3.1...v0.3.2) - 2026-02-09
 - fix: detect Claude Code in Native Install where pane_current_command is a version string by @k1LoW in https://github.com/k1LoW/tcmux/pull/16
 
