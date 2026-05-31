@@ -40,6 +40,7 @@ var InternalPaneVars = []string{
 	"window_index",
 	"window_name",
 	"pane_id",
+	"pane_pid",
 	"pane_current_command",
 	"pane_title",
 }
