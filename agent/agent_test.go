@@ -1,6 +1,8 @@
 package agent
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestDetect(t *testing.T) {
 	tests := []struct {
@@ -101,5 +103,103 @@ func TestDetect(t *testing.T) {
 				t.Errorf("Detect(%q, %q).Type() = %v, want %v", tt.title, tt.currentCommand, got.Type(), tt.wantType)
 			}
 		})
+	}
+}
+
+func TestDetectWithChildCmds(t *testing.T) {
+	tests := []struct {
+		name           string
+		title          string
+		currentCommand string
+		childCmds      []string
+		wantType       Type
+		wantNil        bool
+	}{
+		{
+			name:           "Claude title, zsh command, claude in children",
+			title:          "✳ Task summary",
+			currentCommand: "zsh",
+			childCmds:      []string{"sh", "claude"},
+			wantType:       TypeClaude,
+		},
+		{
+			name:           "Claude title, zsh command, node in children",
+			title:          "✳ Task summary",
+			currentCommand: "zsh",
+			childCmds:      []string{"node"},
+			wantType:       TypeClaude,
+		},
+		{
+			name:           "Claude title, zsh command, no agent child",
+			title:          "✳ Task summary",
+			currentCommand: "zsh",
+			childCmds:      []string{"bash", "sh"},
+			wantNil:        true,
+		},
+		{
+			name:           "Copilot title, zsh command, copilot in children",
+			title:          "GitHub Copilot",
+			currentCommand: "zsh",
+			childCmds:      []string{"copilot"},
+			wantType:       TypeCopilot,
+		},
+		{
+			name:           "Normal shell title with agent child is detected via child process",
+			title:          "some random title",
+			currentCommand: "zsh",
+			childCmds:      []string{"node"},
+			wantType:       TypeClaude,
+		},
+		{
+			name:           "Claude in neovim terminal (nvim title, nvim command, claude in children)",
+			title:          "nvim",
+			currentCommand: "nvim",
+			childCmds:      []string{"node"},
+			wantType:       TypeClaude,
+		},
+		{
+			name:           "Claude in neovim terminal with claude binary child",
+			title:          "nvim",
+			currentCommand: "nvim",
+			childCmds:      []string{"sh", "claude"},
+			wantType:       TypeClaude,
+		},
+		{
+			name:           "Direct detection still works with child cmds",
+			title:          "✳ Task summary",
+			currentCommand: "claude",
+			childCmds:      []string{"sh"},
+			wantType:       TypeClaude,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := detectWithChildCmds(tt.title, tt.currentCommand, tt.childCmds)
+			if tt.wantNil {
+				if got != nil {
+					t.Errorf("detectWithChildCmds(%q, %q, %v) = %v, want nil", tt.title, tt.currentCommand, tt.childCmds, got.Type())
+				}
+				return
+			}
+			if got == nil {
+				t.Errorf("detectWithChildCmds(%q, %q, %v) = nil, want %v", tt.title, tt.currentCommand, tt.childCmds, tt.wantType)
+				return
+			}
+			if got.Type() != tt.wantType {
+				t.Errorf("detectWithChildCmds(%q, %q, %v).Type() = %v, want %v", tt.title, tt.currentCommand, tt.childCmds, got.Type(), tt.wantType)
+			}
+		})
+	}
+}
+
+func TestDetectFromTree_integration(t *testing.T) {
+	// When Claude title is present and current command is not an agent,
+	// DetectFromTree should try child processes (real ps call)
+	// We just verify it doesn't panic and returns consistently
+	got := DetectFromTree(t.Context(), "✳ Task summary", "zsh", "1")
+	// PID 1 (launchd/systemd) won't have claude as child in test env, so result should be nil
+	if got != nil {
+		t.Logf("Unexpected agent detected from PID 1: %v (may be OK in some environments)", got.Type())
 	}
 }

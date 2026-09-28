@@ -74,8 +74,9 @@ var lswCmd = &cobra.Command{
 			// Check if this is a coding agent pane
 			title := pane.Vars["pane_title"]
 			currentCommand := pane.Vars["pane_current_command"]
+			panePID := pane.Vars["pane_pid"]
 
-			if detectedAgent := agent.Detect(title, currentCommand); detectedAgent != nil {
+			if detectedAgent := agent.DetectFromTree(ctx, title, currentCommand, panePID); detectedAgent != nil {
 				// Get coding agent status
 				paneID := pane.Vars["pane_id"]
 				content, err := tmux.CapturePane(ctx, paneID)
