@@ -1,5 +1,8 @@
 # Changelog
 
+## [v0.4.1](https://github.com/k1LoW/tcmux/compare/v0.4.0...v0.4.1) - 2026-09-28
+- ci: generate CREDITS with gocredits v1.0.0 from a make target by @k1LoW in https://github.com/k1LoW/tcmux/pull/21
+
 ## [v0.4.0](https://github.com/k1LoW/tcmux/compare/v0.3.2...v0.4.0) - 2026-03-09
 - feat: add Codex CLI support to tcmux by @k1LoW in https://github.com/k1LoW/tcmux/pull/18
 - feat: add `stats` command for aggregated agent statistics by @hiro-o918 in https://github.com/k1LoW/tcmux/pull/17
